@@ -66,3 +66,78 @@ bun run typecheck  # check types
 - Risk manager enforces position limits, exposure caps, and daily loss limits
 - Graceful shutdown cancels all open orders on SIGINT/SIGTERM
 - All trades persisted to SQLite for audit
+
+# How to use with your own strategy
+ 1. Create your strategy file
+
+Create src/strategies/my-strategy.ts:
+
+```typescript
+  import { BaseStrategy, type StrategyContext } from "./base";
+  import type { TradeSignal, OrderBook } from "../types";
+  import { Side } from "../types";
+
+  interface MyStrategyConfig {
+    orderSize: number;
+    threshold: number;
+  }
+
+  export class MyStrategy extends BaseStrategy {
+    readonly name = "my-strategy";
+    private config: MyStrategyConfig;
+
+    constructor(ctx: StrategyContext, config: Partial<MyStrategyConfig> = {}) {
+      super(ctx);
+      this.config = { orderSize: 10, threshold: 0.05, ...config };
+    }
+
+    evaluate(tokenId: string, orderBook: OrderBook): TradeSignal | null {
+      if (!this._enabled) return null;
+
+      const { midPrice, spread, bids, asks } = orderBook;
+
+      // --- YOUR LOGIC HERE ---
+      // Check current position:
+      const position = this.ctx.orderManager.getPosition(tokenId);
+
+      // Return null = no trade. 
+      if (spread < this.config.threshold) return null;
+
+      // Return a signal = place an order.
+      return {
+        tokenId,
+        side: Side.BUY,
+        confidence: 0.7,        // must be > 0.5 to execute
+        targetPrice: midPrice,
+        size: this.config.orderSize,
+        reason: "spread exceeded threshold",
+      };
+    }
+
+    onOrderFilled(orderId: string, tokenId: string, price: number, size: number) {
+      super.onOrderFilled(orderId, tokenId, price, size);
+      // Track fills, update internal state, call this.recordPnl(amount)
+    }
+  }
+```
+
+  2. Register it
+
+  src/strategies/index.ts — add the export:
+```typescript
+  export { MyStrategy } from "./my-strategy";
+
+  src/bot/factory.ts — add a case in the strategy switch:
+  case "my-strategy":
+    bot.registerStrategy(new MyStrategy(strategyCtx));
+    break;
+```
+
+  3. Run it
+
+  # Dry-run mode (no real orders, safe to test)
+  `DRY_RUN=true STRATEGIES=my-strategy TOKEN_IDS=<token_id> bun run src/main.ts`
+  - Return null when you have no signal — don't force trades
+  - confidence must be > 0.5 or the engine ignores the signal
+  - Check position limits before returning large sizes
+  - The risk manager will block orders that exceed limits (maxPositionSize, maxDailyLoss, etc.) set in your .env

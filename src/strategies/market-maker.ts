@@ -27,14 +27,14 @@ export class MarketMakerStrategy extends BaseStrategy {
     };
   }
 
-  evaluate(tokenId: string, orderBook: OrderBook): TradeSignal | null {
-    if (!this._enabled) return null;
+  evaluate(tokenId: string, orderBook: OrderBook): TradeSignal[] {
+    if (!this._enabled) return [];
 
     const { spread, midPrice, bids, asks } = orderBook;
 
     // Only trade if spread is wide enough
     if (spread < this.config.spreadThreshold) {
-      return null;
+      return [];
     }
 
     const position = this.ctx.orderManager.getPosition(tokenId);
@@ -47,7 +47,7 @@ export class MarketMakerStrategy extends BaseStrategy {
     if (Math.abs(currentInventory) >= this.config.maxPositionSize) {
       // Reduce position
       const side = currentInventory > 0 ? Side.SELL : Side.BUY;
-      return {
+      return [{
         tokenId,
         side,
         confidence: 0.8,
@@ -56,7 +56,7 @@ export class MarketMakerStrategy extends BaseStrategy {
           : midPrice - this.config.priceOffset / 2,
         size: Math.min(this.config.orderSize, Math.abs(currentInventory)),
         reason: "Inventory reduction",
-      };
+      }];
     }
 
     // Place order on the side with more depth (capture spread)
@@ -68,14 +68,14 @@ export class MarketMakerStrategy extends BaseStrategy {
       ? midPrice - this.config.priceOffset - skew
       : midPrice + this.config.priceOffset - skew;
 
-    return {
+    return [{
       tokenId,
       side,
       confidence: Math.min(spread / this.config.spreadThreshold, 1),
       targetPrice: Math.max(0.01, Math.min(0.99, price)),
       size: this.config.orderSize,
       reason: `Spread capture (${(spread * 100).toFixed(2)}%)`,
-    };
+    }];
   }
 
   onOrderFilled(orderId: string, tokenId: string, price: number, size: number): void {

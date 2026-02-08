@@ -25,8 +25,8 @@ export class MomentumStrategy extends BaseStrategy {
     };
   }
 
-  evaluate(tokenId: string, orderBook: OrderBook): TradeSignal | null {
-    if (!this._enabled) return null;
+  evaluate(tokenId: string, orderBook: OrderBook): TradeSignal[] {
+    if (!this._enabled) return [];
 
     const { midPrice } = orderBook;
 
@@ -42,7 +42,7 @@ export class MomentumStrategy extends BaseStrategy {
 
     // Need enough data
     if (history.length < this.config.windowSize) {
-      return null;
+      return [];
     }
 
     // Calculate momentum
@@ -54,18 +54,18 @@ export class MomentumStrategy extends BaseStrategy {
     const currentSize = position?.size ?? 0;
 
     if (Math.abs(priceChange) < this.config.threshold) {
-      return null;
+      return [];
     }
 
     const side = priceChange > 0 ? Side.BUY : Side.SELL;
 
     // Don't add to position if already at limit
-    if (side === Side.BUY && currentSize >= this.config.maxPositionSize) return null;
-    if (side === Side.SELL && currentSize <= -this.config.maxPositionSize) return null;
+    if (side === Side.BUY && currentSize >= this.config.maxPositionSize) return [];
+    if (side === Side.SELL && currentSize <= -this.config.maxPositionSize) return [];
 
     const confidence = Math.min(Math.abs(priceChange) / this.config.threshold, 1);
 
-    return {
+    return [{
       tokenId,
       side,
       confidence,
@@ -74,6 +74,6 @@ export class MomentumStrategy extends BaseStrategy {
         : midPrice - 0.01,
       size: this.config.orderSize,
       reason: `Momentum ${priceChange > 0 ? "up" : "down"} ${(priceChange * 100).toFixed(2)}%`,
-    };
+    }];
   }
 }

@@ -66,6 +66,20 @@ export interface RiskLimits {
   maxOpenOrders: number;
 }
 
+export interface MarketGroup {
+  conditionId: string;
+  tokenIds: string[];
+}
+
+export interface GammaConfig {
+  baseUrl: string;
+  tags: string[];
+  refreshIntervalMs: number;
+  active: boolean;
+  closed: boolean;
+  limit: number;
+}
+
 export interface BotConfig {
   host: string;
   chainId: number;
@@ -76,6 +90,7 @@ export interface BotConfig {
   riskLimits: RiskLimits;
   strategies: string[];
   dryRun: boolean;
+  gamma?: Partial<GammaConfig>;
 }
 
 export interface PriceLevel {
@@ -117,7 +132,8 @@ export type EventType =
   | "position_changed"
   | "strategy_signal"
   | "risk_breach"
-  | "market_update";
+  | "market_update"
+  | "market_groups_updated";
 
 export const Events = {
   ORDERBOOK_UPDATE: "orderbook_update",
@@ -128,6 +144,7 @@ export const Events = {
   STRATEGY_SIGNAL: "strategy_signal",
   RISK_BREACH: "risk_breach",
   MARKET_UPDATE: "market_update",
+  MARKET_GROUPS_UPDATED: "market_groups_updated",
 } as const satisfies Record<string, EventType>;
 
 export interface BotEvent<T = unknown> {

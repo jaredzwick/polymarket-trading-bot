@@ -8,7 +8,7 @@ export interface IStrategy {
   readonly name: string;
   readonly enabled: boolean;
   initialize(): Promise<void>;
-  evaluate(tokenId: string, orderBook: OrderBook): TradeSignal | null;
+  evaluate(tokenId: string, orderBook: OrderBook): TradeSignal[];
   onOrderFilled(orderId: string, tokenId: string, price: number, size: number): void;
   getMetrics(): StrategyMetrics;
   enable(): void;
@@ -50,7 +50,7 @@ export abstract class BaseStrategy implements IStrategy {
     this.ctx.logger.info(`Strategy ${this.name} initialized`);
   }
 
-  abstract evaluate(tokenId: string, orderBook: OrderBook): TradeSignal | null;
+  abstract evaluate(tokenId: string, orderBook: OrderBook): TradeSignal[];
 
   onOrderFilled(orderId: string, tokenId: string, price: number, size: number): void {
     this.metrics.totalTrades++;

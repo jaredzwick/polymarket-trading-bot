@@ -43,7 +43,7 @@ beforeEach(() => {
 test("MeanReversionStrategy waits for enough data", () => {
   for (let i = 0; i < 5; i++) {
     const signal = strategy.evaluate("token-1", createOrderBook(0.5));
-    expect(signal).toBeNull();
+    expect(signal).toEqual([]);
   }
 });
 
@@ -56,9 +56,9 @@ test("MeanReversionStrategy sells when price too high", () => {
   // Spike up significantly
   const signal = strategy.evaluate("token-1", createOrderBook(0.58));
 
-  expect(signal).not.toBeNull();
-  expect(signal!.side).toBe(Side.SELL);
-  expect(signal!.reason).toContain("Mean reversion");
+  expect(signal.length).toBe(1);
+  expect(signal[0].side).toBe(Side.SELL);
+  expect(signal[0].reason).toContain("Mean reversion");
 });
 
 test("MeanReversionStrategy buys when price too low", () => {
@@ -69,9 +69,9 @@ test("MeanReversionStrategy buys when price too low", () => {
   // Drop significantly
   const signal = strategy.evaluate("token-1", createOrderBook(0.42));
 
-  expect(signal).not.toBeNull();
-  expect(signal!.side).toBe(Side.BUY);
-  expect(signal!.reason).toContain("Mean reversion");
+  expect(signal.length).toBe(1);
+  expect(signal[0].side).toBe(Side.BUY);
+  expect(signal[0].reason).toContain("Mean reversion");
 });
 
 test("MeanReversionStrategy ignores normal fluctuations", () => {
@@ -83,7 +83,7 @@ test("MeanReversionStrategy ignores normal fluctuations", () => {
 
   // Within normal range
   const signal = strategy.evaluate("token-1", createOrderBook(0.505));
-  expect(signal).toBeNull();
+  expect(signal).toEqual([]);
 });
 
 test("MeanReversionStrategy targets mean price", () => {
@@ -93,6 +93,6 @@ test("MeanReversionStrategy targets mean price", () => {
 
   const signal = strategy.evaluate("token-1", createOrderBook(0.58));
 
-  expect(signal).not.toBeNull();
-  expect(signal!.targetPrice).toBeCloseTo(0.508, 1); // Mean of 9x0.50 + 1x0.58
+  expect(signal.length).toBe(1);
+  expect(signal[0].targetPrice).toBeCloseTo(0.508, 1); // Mean of 9x0.50 + 1x0.58
 });

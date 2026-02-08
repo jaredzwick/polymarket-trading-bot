@@ -6,14 +6,16 @@ import { SQLiteStore } from "../core/store";
 import { MarketDataService } from "../services/market-data";
 import { OrderManager } from "../services/order-manager";
 import { RiskManager } from "../services/risk-manager";
+import { GammaService } from "../services/gamma";
 import { TradingBot, type BotDependencies } from "./engine";
 import {
   MarketMakerStrategy,
   MomentumStrategy,
   MeanReversionStrategy,
+  BregmanArbStrategy,
   type StrategyContext,
 } from "../strategies";
-import type { BotConfig, RiskLimits } from "../types";
+import { Events, type BotConfig, type RiskLimits, type MarketGroup } from "../types";
 
 const DEFAULT_RISK_LIMITS: RiskLimits = {
   maxPositionSize: 100,
@@ -23,7 +25,10 @@ const DEFAULT_RISK_LIMITS: RiskLimits = {
   maxOpenOrders: 10,
 };
 
-export function createBot(config: Partial<BotConfig> = {}): TradingBot {
+export function createBot(config: Partial<BotConfig> = {}): { bot: TradingBot; gamma?: GammaService } {
+  if (!config.strategies || config.strategies.length === 0) {
+    throw new Error("At least one strategy must be specified in the config, specify with STRATEGIES env var (e.g. STRATEGIES=market-maker,momentum)");
+  }
   const fullConfig: BotConfig = {
     host: config.host ?? "https://clob.polymarket.com",
     chainId: config.chainId ?? Chain.POLYGON,
@@ -80,6 +85,8 @@ export function createBot(config: Partial<BotConfig> = {}): TradingBot {
     logger,
   };
 
+  let gamma: GammaService | undefined;
+
   for (const strategyName of fullConfig.strategies) {
     switch (strategyName) {
       case "market-maker":
@@ -91,12 +98,25 @@ export function createBot(config: Partial<BotConfig> = {}): TradingBot {
       case "mean-reversion":
         bot.registerStrategy(new MeanReversionStrategy(strategyCtx));
         break;
+      case "bregman-arb": {
+        const bregmanStrategy = new BregmanArbStrategy(strategyCtx, []);
+        bot.registerStrategy(bregmanStrategy);
+
+        gamma = new GammaService(events, logger, fullConfig.gamma);
+        events.on(Events.MARKET_GROUPS_UPDATED, (event) => {
+          const { groups } = event.data as { groups: MarketGroup[] };
+          bregmanStrategy.updateMarketGroups(groups);
+          const allTokenIds = groups.flatMap((g) => g.tokenIds);
+          bot.addTokens(allTokenIds);
+        });
+        break;
+      }
       default:
         logger.warn("Unknown strategy", { name: strategyName });
     }
   }
 
-  return bot;
+  return { bot, gamma };
 }
 
 export function loadConfigFromEnv(): Partial<BotConfig> {
@@ -109,6 +129,12 @@ export function loadConfigFromEnv(): Partial<BotConfig> {
     apiPassphrase: process.env.POLYMARKET_API_PASSPHRASE,
     dryRun: process.env.DRY_RUN !== "false",
     strategies: process.env.STRATEGIES?.split(",") ?? undefined,
+    gamma: {
+      tags: process.env.GAMMA_TAGS?.split(","),
+      refreshIntervalMs: process.env.GAMMA_REFRESH_INTERVAL ? parseInt(process.env.GAMMA_REFRESH_INTERVAL) : undefined,
+      baseUrl: process.env.GAMMA_BASE_URL,
+      limit: process.env.GAMMA_LIMIT ? parseInt(process.env.GAMMA_LIMIT) : undefined,
+    },
     riskLimits: {
       maxPositionSize: process.env.MAX_POSITION_SIZE ? parseFloat(process.env.MAX_POSITION_SIZE) : undefined,
       maxTotalExposure: process.env.MAX_TOTAL_EXPOSURE ? parseFloat(process.env.MAX_TOTAL_EXPOSURE) : undefined,

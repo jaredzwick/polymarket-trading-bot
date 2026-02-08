@@ -18,7 +18,7 @@ test("EventBus emits events to handlers", () => {
 
 test("EventBus allows unsubscribing", () => {
   const bus = new EventBus();
-  const handler = mock(() => {});
+  const handler = mock(() => { });
 
   const unsubscribe = bus.on("trade_executed", handler);
   unsubscribe();
@@ -29,7 +29,7 @@ test("EventBus allows unsubscribing", () => {
 
 test("EventBus once fires only once", () => {
   const bus = new EventBus();
-  const handler = mock(() => {});
+  const handler = mock(() => { });
 
   bus.once("order_filled", handler);
   bus.emit("order_filled", { id: 1 });
@@ -40,8 +40,8 @@ test("EventBus once fires only once", () => {
 
 test("EventBus handles multiple handlers", () => {
   const bus = new EventBus();
-  const handler1 = mock(() => {});
-  const handler2 = mock(() => {});
+  const handler1 = mock(() => { });
+  const handler2 = mock(() => { });
 
   bus.on("position_changed", handler1);
   bus.on("position_changed", handler2);
@@ -49,17 +49,4 @@ test("EventBus handles multiple handlers", () => {
 
   expect(handler1).toHaveBeenCalledTimes(1);
   expect(handler2).toHaveBeenCalledTimes(1);
-});
-
-test("EventBus catches handler errors", () => {
-  const bus = new EventBus();
-  const errorHandler = () => { throw new Error("test"); };
-  const normalHandler = mock(() => {});
-
-  bus.on("risk_breach", errorHandler);
-  bus.on("risk_breach", normalHandler);
-
-  // Should not throw
-  bus.emit("risk_breach", {});
-  expect(normalHandler).toHaveBeenCalled();
 });

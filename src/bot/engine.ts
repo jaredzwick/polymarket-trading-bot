@@ -47,7 +47,7 @@ export class TradingBot {
     });
 
     this.deps.events.on(Events.RISK_BREACH, async () => {
-      this.deps.logger.error("Risk breach detected, cancelling all orders");
+      this.deps.logger.info("Risk breach detected, cancelling all orders");
       await this.deps.orderManager.cancelAllOrders();
     });
   }
@@ -68,6 +68,18 @@ export class TradingBot {
   setTokens(tokenIds: string[]): void {
     this.tokenIds = tokenIds;
     this.deps.marketData.subscribe(tokenIds);
+  }
+
+  addTokens(tokenIds: string[]): void {
+    const newTokens = tokenIds.filter((id) => !this.tokenIds.includes(id));
+    if (newTokens.length === 0) return;
+    this.tokenIds.push(...newTokens);
+    this.deps.marketData.subscribe(newTokens);
+    this.deps.logger.debug("Added tokens", { count: newTokens.length });
+  }
+
+  getStrategy(name: string): IStrategy | undefined {
+    return this.strategies.get(name);
   }
 
   async start(): Promise<void> {
@@ -127,9 +139,11 @@ export class TradingBot {
       if (!strategy.enabled) continue;
 
       try {
-        const signal = strategy.evaluate(tokenId, orderBook);
-        if (signal && signal.confidence > 0.5) {
-          signals.push(signal);
+        const strategySignals = strategy.evaluate(tokenId, orderBook);
+        for (const signal of strategySignals) {
+          if (signal.confidence > 0.5) {
+            signals.push(signal);
+          }
         }
       } catch (err) {
         this.deps.logger.error("Strategy evaluation error", {

@@ -44,7 +44,7 @@ test("MomentumStrategy waits for enough data", () => {
   // Only 3 updates, need 5
   for (let i = 0; i < 3; i++) {
     const signal = strategy.evaluate("token-1", createOrderBook(0.5));
-    expect(signal).toBeNull();
+    expect(signal).toEqual([]);
   }
 });
 
@@ -57,9 +57,9 @@ test("MomentumStrategy detects upward momentum", () => {
 
   const signal = strategy.evaluate("token-1", createOrderBook(prices[4]));
 
-  expect(signal).not.toBeNull();
-  expect(signal!.side).toBe(Side.BUY);
-  expect(signal!.reason).toContain("up");
+  expect(signal.length).toBe(1);
+  expect(signal[0].side).toBe(Side.BUY);
+  expect(signal[0].reason).toContain("up");
 });
 
 test("MomentumStrategy detects downward momentum", () => {
@@ -70,9 +70,9 @@ test("MomentumStrategy detects downward momentum", () => {
 
   const signal = strategy.evaluate("token-1", createOrderBook(prices[4]));
 
-  expect(signal).not.toBeNull();
-  expect(signal!.side).toBe(Side.SELL);
-  expect(signal!.reason).toContain("down");
+  expect(signal.length).toBe(1);
+  expect(signal[0].side).toBe(Side.SELL);
+  expect(signal[0].reason).toContain("down");
 });
 
 test("MomentumStrategy ignores small movements", () => {
@@ -82,5 +82,5 @@ test("MomentumStrategy ignores small movements", () => {
   }
 
   const signal = strategy.evaluate("token-1", createOrderBook(prices[4]));
-  expect(signal).toBeNull();
+  expect(signal).toEqual([]);
 });

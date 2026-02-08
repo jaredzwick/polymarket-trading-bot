@@ -25,8 +25,8 @@ export class MeanReversionStrategy extends BaseStrategy {
     };
   }
 
-  evaluate(tokenId: string, orderBook: OrderBook): TradeSignal | null {
-    if (!this._enabled) return null;
+  evaluate(tokenId: string, orderBook: OrderBook): TradeSignal[] {
+    if (!this._enabled) return [];
 
     const { midPrice } = orderBook;
 
@@ -40,7 +40,7 @@ export class MeanReversionStrategy extends BaseStrategy {
     }
 
     if (history.length < this.config.windowSize) {
-      return null;
+      return [];
     }
 
     // Calculate mean and std dev
@@ -48,7 +48,7 @@ export class MeanReversionStrategy extends BaseStrategy {
     const variance = history.reduce((sum, p) => sum + (p - mean) ** 2, 0) / history.length;
     const stdDev = Math.sqrt(variance);
 
-    if (stdDev === 0) return null;
+    if (stdDev === 0) return [];
 
     const zScore = (midPrice - mean) / stdDev;
 
@@ -57,25 +57,25 @@ export class MeanReversionStrategy extends BaseStrategy {
     const currentSize = position?.size ?? 0;
 
     if (Math.abs(zScore) < this.config.stdDevThreshold) {
-      return null;
+      return [];
     }
 
     // Price is too high, expect it to revert down -> SELL
     // Price is too low, expect it to revert up -> BUY
     const side = zScore > 0 ? Side.SELL : Side.BUY;
 
-    if (side === Side.BUY && currentSize >= this.config.maxPositionSize) return null;
-    if (side === Side.SELL && currentSize <= -this.config.maxPositionSize) return null;
+    if (side === Side.BUY && currentSize >= this.config.maxPositionSize) return [];
+    if (side === Side.SELL && currentSize <= -this.config.maxPositionSize) return [];
 
     const confidence = Math.min(Math.abs(zScore) / (this.config.stdDevThreshold * 2), 1);
 
-    return {
+    return [{
       tokenId,
       side,
       confidence,
       targetPrice: mean, // Target the mean
       size: this.config.orderSize,
       reason: `Mean reversion z=${zScore.toFixed(2)} (mean=${mean.toFixed(3)})`,
-    };
+    }];
   }
 }

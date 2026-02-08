@@ -41,7 +41,7 @@ test("MarketMakerStrategy ignores narrow spreads", () => {
   };
 
   const signal = strategy.evaluate("token-1", orderBook);
-  expect(signal).toBeNull();
+  expect(signal).toEqual([]);
 });
 
 test("MarketMakerStrategy generates signal for wide spread", () => {
@@ -56,10 +56,10 @@ test("MarketMakerStrategy generates signal for wide spread", () => {
 
   const signal = strategy.evaluate("token-1", orderBook);
 
-  expect(signal).not.toBeNull();
-  expect(signal!.tokenId).toBe("token-1");
-  expect(signal!.confidence).toBeGreaterThan(0);
-  expect(signal!.reason).toContain("Spread capture");
+  expect(signal.length).toBe(1);
+  expect(signal[0].tokenId).toBe("token-1");
+  expect(signal[0].confidence).toBeGreaterThan(0);
+  expect(signal[0].reason).toContain("Spread capture");
 });
 
 test("MarketMakerStrategy respects enabled state", () => {
@@ -75,7 +75,7 @@ test("MarketMakerStrategy respects enabled state", () => {
   };
 
   const signal = strategy.evaluate("token-1", orderBook);
-  expect(signal).toBeNull();
+  expect(signal).toEqual([]);
 });
 
 test("MarketMakerStrategy tracks metrics", () => {

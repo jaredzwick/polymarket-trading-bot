@@ -77,12 +77,8 @@ export class MarketDataService implements IMarketDataService {
       tokens.map(async (tokenId) => {
         try {
           const orderBook = await this.client.getOrderBook(tokenId);
-          const prev = this.orderBooks.get(tokenId);
           this.orderBooks.set(tokenId, orderBook);
-
-          if (!prev || prev.midPrice !== orderBook.midPrice) {
-            this.events.emit(Events.ORDERBOOK_UPDATE, { tokenId, orderBook });
-          }
+          this.events.emit(Events.ORDERBOOK_UPDATE, { tokenId, orderBook });
         } catch (err) {
           this.logger.error("Failed to fetch orderbook", {
             tokenId,
