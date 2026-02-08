@@ -132,9 +132,7 @@ export function ArbMonitor() {
                 <span className="mono" style={{ color: "var(--text-secondary)" }}>
                   x{s.signal.size.toFixed(1)}
                 </span>
-                <span style={{ color: "var(--text-muted)", fontSize: 11, marginLeft: "auto" }}>
-                  {s.signal.reason}
-                </span>
+                <span className="signal-reason">{s.signal.reason}</span>
               </div>
             ))}
           </div>

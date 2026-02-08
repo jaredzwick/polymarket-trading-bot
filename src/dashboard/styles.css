@@ -21,6 +21,11 @@
   --blue: #448aff;
   --blue-dim: #448aff33;
   --purple: #b388ff;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -28,18 +33,21 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
-/* Layout */
+/* ── Layout ── */
 .app-layout {
   display: grid;
   grid-template-columns: 200px 1fr;
   grid-template-rows: 48px 1fr;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .sidebar {
@@ -78,6 +86,7 @@ body {
   background: none;
   text-align: left;
   width: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .nav-item:hover {
@@ -96,16 +105,18 @@ body {
   overflow-y: auto;
 }
 
-/* Status bar */
+/* ── Status bar ── */
 .status-bar {
   grid-column: 2;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
   padding: 0 20px;
   font-size: 12px;
+  min-height: 48px;
 }
 
 .status-item {
@@ -113,12 +124,14 @@ body {
   align-items: center;
   gap: 6px;
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .status-dot.running {
@@ -146,7 +159,7 @@ body {
   font-weight: 600;
 }
 
-/* Cards */
+/* ── Cards ── */
 .card {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
@@ -162,7 +175,7 @@ body {
   margin-bottom: 12px;
 }
 
-/* Grid layouts */
+/* ── Grid layouts ── */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -197,15 +210,17 @@ body {
   font-weight: 700;
 }
 
-/* Tables */
+/* ── Tables ── */
 .table-wrapper {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+  min-width: 400px;
 }
 
 thead th {
@@ -217,6 +232,10 @@ thead th {
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border);
   font-weight: 600;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: var(--bg-secondary);
 }
 
 tbody td {
@@ -224,13 +243,14 @@ tbody td {
   border-bottom: 1px solid var(--border);
   font-family: "SF Mono", "Fira Code", monospace;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 tbody tr:hover {
   background: var(--bg-tertiary);
 }
 
-/* Number formatting */
+/* ── Number formatting ── */
 .mono {
   font-family: "SF Mono", "Fira Code", monospace;
 }
@@ -247,7 +267,7 @@ tbody tr:hover {
   color: var(--text-secondary);
 }
 
-/* Gauge */
+/* ── Gauge ── */
 .gauge {
   background: var(--bg-tertiary);
   border-radius: 6px;
@@ -263,16 +283,16 @@ tbody tr:hover {
 }
 
 .gauge-bar-bg {
-  height: 6px;
+  height: 8px;
   background: var(--bg-primary);
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .gauge-bar-fill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: 4px;
   transition: width 0.3s;
 }
 
@@ -283,7 +303,7 @@ tbody tr:hover {
   font-size: 12px;
 }
 
-/* Funnel */
+/* ── Funnel ── */
 .funnel {
   display: flex;
   flex-direction: column;
@@ -294,7 +314,7 @@ tbody tr:hover {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   background: var(--bg-tertiary);
   border-radius: 4px;
 }
@@ -312,22 +332,23 @@ tbody tr:hover {
   color: var(--text-secondary);
 }
 
-/* Signal feed */
+/* ── Signal feed ── */
 .signal-feed {
   max-height: 300px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .signal-item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: 6px 8px;
+  padding: 8px 10px;
   background: var(--bg-tertiary);
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 12px;
 }
 
@@ -356,9 +377,17 @@ tbody tr:hover {
   color: var(--red);
 }
 
-/* Alert banner */
+.signal-reason {
+  color: var(--text-muted);
+  font-size: 11px;
+  flex-basis: 100%;
+  margin-top: 2px;
+  word-break: break-word;
+}
+
+/* ── Alert banner ── */
 .alert-banner {
-  padding: 10px 16px;
+  padding: 12px 16px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
@@ -371,11 +400,18 @@ tbody tr:hover {
   border: 1px solid var(--red);
 }
 
-/* Strategy card */
+/* ── Strategy card ── */
 .strategy-card {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.strategy-header {
+  display: flex;
+  align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .strategy-name {
@@ -418,7 +454,7 @@ tbody tr:hover {
   text-align: right;
 }
 
-/* Chart container */
+/* ── Chart container ── */
 .chart-container {
   width: 100%;
   height: 300px;
@@ -426,28 +462,29 @@ tbody tr:hover {
   overflow: hidden;
 }
 
-/* Empty state */
+/* ── Empty state ── */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 40px 20px;
   color: var(--text-muted);
   font-size: 13px;
   gap: 8px;
+  text-align: center;
 }
 
-/* Loading */
+/* ── Loading ── */
 .loading {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 40px 20px;
   color: var(--text-secondary);
 }
 
-/* Market groups */
+/* ── Market groups ── */
 .market-group {
   padding: 10px 12px;
   background: var(--bg-tertiary);
@@ -459,15 +496,17 @@ tbody tr:hover {
   font-family: "SF Mono", "Fira Code", monospace;
   font-size: 12px;
   color: var(--purple);
+  word-break: break-all;
 }
 
 .market-group-count {
   font-size: 11px;
   color: var(--text-secondary);
   margin-top: 4px;
+  word-break: break-all;
 }
 
-/* Section spacing */
+/* ── Section spacing ── */
 .section {
   margin-bottom: 24px;
 }
@@ -478,7 +517,47 @@ tbody tr:hover {
   margin-bottom: 12px;
 }
 
-/* Scrollbar */
+/* ── Mobile card layout for data items ── */
+.data-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.data-card {
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  align-items: baseline;
+}
+
+.data-card-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-card-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.data-card-value {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 12px;
+  text-align: right;
+}
+
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -495,4 +574,253 @@ tbody tr:hover {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════
+   Tablet (≤ 1024px)
+   ═══════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .app-layout {
+    grid-template-columns: 160px 1fr;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-row {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  .signal-reason {
+    flex-basis: 100%;
+  }
+}
+
+/* ═══════════════════════════════════════
+   Mobile (≤ 768px)
+   ═══════════════════════════════════════ */
+@media (max-width: 768px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  /* Sidebar → bottom tab bar */
+  .sidebar {
+    grid-row: 3;
+    grid-column: 1;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    padding: 0;
+    padding-bottom: var(--safe-bottom);
+    flex-direction: row;
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+  }
+
+  .sidebar-title {
+    display: none;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    padding: 0;
+    gap: 0;
+    width: 100%;
+  }
+
+  .nav-item {
+    flex: 1;
+    text-align: center;
+    border-radius: 0;
+    padding: 14px 8px;
+    font-size: 13px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-item:hover {
+    background: none;
+  }
+
+  .nav-item.active {
+    background: none;
+    border-top: 2px solid var(--blue);
+    padding-top: 12px;
+  }
+
+  /* Status bar full width */
+  .status-bar {
+    grid-column: 1;
+    grid-row: 1;
+    gap: 8px 14px;
+    padding: 8px 12px;
+    min-height: auto;
+  }
+
+  .main-content {
+    padding: 12px;
+    overflow-x: hidden;
+  }
+
+  /* Responsive chart */
+  .chart-container {
+    height: 220px;
+  }
+
+  /* Smaller metric values */
+  .metric-value {
+    font-size: 16px;
+  }
+
+  .metric-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  /* Funnel */
+  .funnel-step {
+    padding: 8px 10px;
+  }
+
+  .funnel-count {
+    font-size: 13px;
+    min-width: 50px;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  /* Card padding */
+  .card {
+    padding: 12px;
+  }
+
+  /* Tables: show card layout instead */
+  .mobile-cards {
+    display: flex;
+  }
+  .mobile-table {
+    display: none;
+  }
+
+  /* Table fallback — if desktop table is used on mobile */
+  table {
+    font-size: 12px;
+  }
+
+  thead th {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+
+  tbody td {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  /* Signal feed */
+  .signal-item {
+    padding: 8px;
+  }
+
+  .signal-time {
+    min-width: auto;
+    font-size: 10px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: 24px 16px;
+  }
+
+  .loading {
+    padding: 24px 16px;
+  }
+}
+
+/* ═══════════════════════════════════════
+   Small mobile (≤ 480px)
+   ═══════════════════════════════════════ */
+@media (max-width: 480px) {
+  .status-bar {
+    gap: 6px 10px;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .main-content {
+    padding: 8px;
+  }
+
+  .card {
+    border-radius: 6px;
+    padding: 10px;
+  }
+
+  .metric-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .metric-item {
+    padding: 8px;
+  }
+
+  .metric-label {
+    font-size: 10px;
+  }
+
+  .metric-value {
+    font-size: 14px;
+  }
+
+  .chart-container {
+    height: 180px;
+  }
+
+  .gauge-bar-bg {
+    height: 6px;
+  }
+
+  .funnel-count {
+    font-size: 12px;
+    min-width: 44px;
+  }
+
+  .funnel-label {
+    font-size: 11px;
+  }
+
+  .strategy-name {
+    font-size: 14px;
+  }
+}
+
+/* ── Desktop-only / mobile-only helpers ── */
+.mobile-cards {
+  display: none;
+}
+.mobile-table {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .mobile-cards {
+    display: flex;
+  }
+  .mobile-table {
+    display: none;
+  }
 }

@@ -28,18 +28,27 @@ function Gauge({ label, value, max, color }: { label: string; value: number; max
         />
       </div>
       <div className="gauge-values">
-        <span>{value.toFixed(2)}</span>
-        <span style={{ color: "var(--text-muted)" }}>{max.toFixed(2)}</span>
+        <span>{typeof value === "number" && !Number.isInteger(value) ? value.toFixed(2) : value}</span>
+        <span style={{ color: "var(--text-muted)" }}>
+          {typeof max === "number" && !Number.isInteger(max) ? max.toFixed(2) : max}
+        </span>
       </div>
     </div>
   );
 }
 
+const LIMIT_LABELS: Record<string, string> = {
+  maxPositionSize: "Max Position Size",
+  maxTotalExposure: "Max Total Exposure",
+  maxLossPerTrade: "Max Loss Per Trade",
+  maxDailyLoss: "Max Daily Loss",
+  maxOpenOrders: "Max Open Orders",
+};
+
 export function RiskPanel() {
   const { data: riskData, loading } = useApi<RiskData>("/api/risk", 5000);
   const snapshot = useSnapshot();
 
-  // Prefer snapshot data for freshness
   const snapshotRisk = snapshot?.risk as { exposure?: { total?: number }; halted?: boolean; dailyPnl?: number } | null;
 
   const risk = riskData;
@@ -50,6 +59,8 @@ export function RiskPanel() {
   const halted = snapshotRisk?.halted ?? risk.halted;
   const dailyPnl = snapshotRisk?.dailyPnl ?? risk.dailyPnl;
   const orderCount = (snapshot?.orderCount as number) ?? 0;
+
+  const tokenEntries = Object.entries(risk.exposure.byToken);
 
   return (
     <>
@@ -80,60 +91,57 @@ export function RiskPanel() {
       </div>
 
       <div className="section-title">Risk Limits</div>
-      <div className="card table-wrapper" style={{ marginBottom: 24 }}>
-        <table>
-          <thead>
-            <tr>
-              <th>Limit</th>
-              <th>Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Max Position Size</td>
-              <td>${risk.limits.maxPositionSize.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td>Max Total Exposure</td>
-              <td>${risk.limits.maxTotalExposure.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td>Max Loss Per Trade</td>
-              <td>${risk.limits.maxLossPerTrade.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td>Max Daily Loss</td>
-              <td>${risk.limits.maxDailyLoss.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td>Max Open Orders</td>
-              <td>{risk.limits.maxOpenOrders}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div className="card" style={{ marginBottom: 24 }}>
+        <div className="data-cards">
+          {Object.entries(risk.limits).map(([key, val]) => (
+            <div key={key} style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "8px 0",
+              borderBottom: "1px solid var(--border)",
+            }}>
+              <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+                {LIMIT_LABELS[key] ?? key}
+              </span>
+              <span className="mono" style={{ fontSize: 13 }}>
+                {key === "maxOpenOrders" ? val : `$${(val as number).toFixed(2)}`}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="section-title">Exposure by Token</div>
-      {Object.keys(risk.exposure.byToken).length === 0 ? (
+      {tokenEntries.length === 0 ? (
         <div className="card empty-state">No exposure</div>
       ) : (
-        <div className="card table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Token</th>
-                <th>Exposure</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(risk.exposure.byToken).map(([tokenId, value]) => (
-                <tr key={tokenId}>
-                  <td>{tokenId.slice(0, 16)}...</td>
-                  <td>${(value as number).toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="card">
+          <div className="data-cards">
+            {tokenEntries.map(([tokenId, value]) => (
+              <div key={tokenId} style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "8px 0",
+                borderBottom: "1px solid var(--border)",
+                gap: 8,
+              }}>
+                <span className="mono" style={{
+                  fontSize: 12,
+                  color: "var(--purple)",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  minWidth: 0,
+                }}>
+                  {tokenId.slice(0, 16)}...
+                </span>
+                <span className="mono" style={{ fontSize: 13, flexShrink: 0 }}>
+                  ${(value as number).toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </>

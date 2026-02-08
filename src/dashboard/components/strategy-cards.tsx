@@ -31,9 +31,9 @@ export function StrategyCards() {
           : "0.0";
         return (
           <div className="card strategy-card" key={s.name}>
-            <div>
+            <div className="strategy-header">
               <span className="strategy-name">{s.name}</span>
-              <span className={`strategy-badge ${s.enabled ? "enabled" : "disabled"}`} style={{ marginLeft: 8 }}>
+              <span className={`strategy-badge ${s.enabled ? "enabled" : "disabled"}`}>
                 {s.enabled ? "ENABLED" : "DISABLED"}
               </span>
             </div>
