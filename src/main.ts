@@ -1,9 +1,10 @@
 import { createBot, loadConfigFromEnv } from "./bot/factory";
+import { createDashboardServer } from "./api/server";
 import type { BregmanArbStrategy } from "./strategies/bregman-arb";
 
 async function main() {
   const config = loadConfigFromEnv();
-  const { bot, gamma } = createBot(config);
+  const { bot, gamma, deps } = createBot(config);
 
   const tokenIds = new Set(process.env.TOKEN_IDS?.split(",").filter(Boolean) ?? []);
 
@@ -14,8 +15,12 @@ async function main() {
   bot.setTokens(Array.from(tokenIds));
 
   // Graceful shutdown
+  const dashboardPort = parseInt(process.env.DASHBOARD_PORT ?? "3000", 10);
+  let server: ReturnType<typeof createDashboardServer> | undefined;
+
   const shutdown = async (signal: string) => {
     console.log(`\nReceived ${signal}, shutting down...`);
+    server?.stop();
     gamma?.stop();
     await bot.stop();
     process.exit(0);
@@ -30,6 +35,10 @@ async function main() {
   }
 
   await bot.start();
+
+  // Start dashboard
+  server = createDashboardServer({ bot, gamma, deps }, dashboardPort);
+  console.log(`Dashboard running at http://localhost:${dashboardPort}`);
 
   // Status reporting
   setInterval(() => {

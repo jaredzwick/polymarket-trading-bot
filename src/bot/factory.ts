@@ -25,7 +25,13 @@ const DEFAULT_RISK_LIMITS: RiskLimits = {
   maxOpenOrders: 10,
 };
 
-export function createBot(config: Partial<BotConfig> = {}): { bot: TradingBot; gamma?: GammaService } {
+export interface BotInstance {
+  bot: TradingBot;
+  gamma?: GammaService;
+  deps: BotDependencies;
+}
+
+export function createBot(config: Partial<BotConfig> = {}): BotInstance {
   if (!config.strategies || config.strategies.length === 0) {
     throw new Error("At least one strategy must be specified in the config, specify with STRATEGIES env var (e.g. STRATEGIES=market-maker,momentum)");
   }
@@ -116,7 +122,7 @@ export function createBot(config: Partial<BotConfig> = {}): { bot: TradingBot; g
     }
   }
 
-  return { bot, gamma };
+  return { bot, gamma, deps };
 }
 
 export function loadConfigFromEnv(): Partial<BotConfig> {
