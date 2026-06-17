@@ -11,6 +11,7 @@ import { OrdersTable } from "./components/orders-table";
 import { RiskPanel } from "./components/risk-panel";
 import { TradeLog } from "./components/trade-log";
 import { MarketGroups } from "./components/market-groups";
+import { SignalsPanel } from "./components/signals-panel";
 import "./styles.css";
 
 function OverviewTab() {
@@ -33,6 +34,15 @@ function OverviewTab() {
         <TradeLog />
       </div>
     </>
+  );
+}
+
+function SignalsTab() {
+  return (
+    <div className="section">
+      <div className="section-title">Live Signals — last 20</div>
+      <SignalsPanel />
+    </div>
   );
 }
 
@@ -69,6 +79,7 @@ function App() {
     <WebSocketProvider>
       <Layout activeTab={tab} onTabChange={setTab} statusBar={<StatusBar />}>
         {tab === "overview" && <OverviewTab />}
+        {tab === "signals" && <SignalsTab />}
         {tab === "arb" && <ArbTab />}
         {tab === "risk" && <RiskTab />}
       </Layout>

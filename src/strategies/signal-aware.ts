@@ -117,6 +117,7 @@ export class SignalAwareStrategy extends BaseStrategy {
         targetPrice,
         size: adjustedSize,
         reason: `Signal consensus: buy=${buyVotes.toFixed(2)} sell=${sellVotes.toFixed(2)} risk×${riskMultiplier.toFixed(2)}`,
+        triggeringSignalIds: signals_.map((s) => s.id),
       },
     ];
   }

@@ -131,3 +131,32 @@ test("SignalAwareStrategy disabled returns no signals", async () => {
   strategy.disable();
   expect(strategy.evaluate("tok-1", makeOrderBook())).toHaveLength(0);
 });
+
+test("SignalAwareStrategy populates triggeringSignalIds on trade signal output", () => {
+  const sig1: Signal = {
+    id: "aaa-111",
+    kind: "trade",
+    source: "test",
+    tokenId: "tok-1",
+    confidence: 0.8,
+    payload: { side: "BUY", targetPrice: 0.55, size: 10, reason: "up" },
+    timestamp: new Date(),
+  };
+  const sig2: Signal = {
+    id: "bbb-222",
+    kind: "trade",
+    source: "test",
+    tokenId: "tok-1",
+    confidence: 0.9,
+    payload: { side: "BUY", targetPrice: 0.56, size: 10, reason: "up2" },
+    timestamp: new Date(),
+  };
+  ctx.events.emit(Events.SIGNAL_EMITTED, sig1);
+  ctx.events.emit(Events.SIGNAL_EMITTED, sig2);
+
+  const result = strategy.evaluate("tok-1", makeOrderBook(0.5));
+  expect(result.length).toBeGreaterThan(0);
+  expect(result[0].triggeringSignalIds).toBeDefined();
+  expect(result[0].triggeringSignalIds).toContain("aaa-111");
+  expect(result[0].triggeringSignalIds).toContain("bbb-222");
+});

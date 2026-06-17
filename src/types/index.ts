@@ -56,6 +56,8 @@ export interface TradeSignal {
   targetPrice: number;
   size: number;
   reason: string;
+  /** IDs of signals that triggered this trade decision (populated by SignalAwareStrategy). */
+  triggeringSignalIds?: string[];
 }
 
 export interface RiskLimits {
