@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background square with rounded corners -->
+  <rect x="10" y="10" width="180" height="180" rx="40" fill="url(#logoGrad)"/>
+  <!-- Chart bars (stylized) -->
+  <rect x="40" y="110" width="20" height="60" rx="4" fill="rgba(255,255,255,0.5)"/>
+  <rect x="72" y="80" width="20" height="90" rx="4" fill="rgba(255,255,255,0.7)"/>
+  <rect x="104" y="55" width="20" height="115" rx="4" fill="rgba(255,255,255,0.85)"/>
+  <rect x="136" y="30" width="20" height="140" rx="4" fill="white"/>
+  <!-- Bolt/lightning overlay -->
+  <polygon points="115,35 95,100 110,100 90,165 130,90 113,90 130,35" fill="rgba(255,255,255,0.15)"/>
+</svg>
