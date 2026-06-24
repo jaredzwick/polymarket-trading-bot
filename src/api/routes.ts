@@ -68,6 +68,10 @@ export function createRoutes(ctx: DashboardContext): Record<string, (req: Reques
       if (!ctx.gamma) return json([]);
       return json(ctx.gamma.getMarketGroups());
     },
+
+    "/api/signals": () => {
+      return json([...(ctx.signalRing ?? [])].reverse());
+    },
   };
 }
 

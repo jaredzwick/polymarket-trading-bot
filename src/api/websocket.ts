@@ -2,6 +2,9 @@ import type { ServerWebSocket } from "bun";
 import type { DashboardContext } from "./context";
 import type { BregmanArbStrategy } from "../strategies/bregman-arb";
 import { Events, type EventType } from "../types";
+import type { Signal } from "../types/signal";
+
+export const SIGNAL_RING_SIZE = 20;
 
 interface WsData {
   subscribedOrderbooks: Set<string>;
@@ -20,6 +23,20 @@ const STREAMED_EVENTS: EventType[] = [
 export function setupWebSocket(ctx: DashboardContext) {
   const clients = new Set<ServerWebSocket<WsData>>();
   const unsubscribers: (() => void)[] = [];
+
+  // In-memory ring buffer: last N signals for REST + new-client priming
+  const signalRing: Signal[] = [];
+
+  const signalUnsub = ctx.deps.events.on<Signal>(Events.SIGNAL_EMITTED, (event) => {
+    signalRing.push(event.data);
+    if (signalRing.length > SIGNAL_RING_SIZE) signalRing.shift();
+    const msg = JSON.stringify({ type: "event", event: Events.SIGNAL_EMITTED, data: event.data, timestamp: event.timestamp });
+    for (const ws of clients) ws.send(msg);
+  });
+  unsubscribers.push(signalUnsub);
+
+  // Expose ring buffer for REST endpoint
+  ctx.signalRing = signalRing;
 
   // Subscribe to streamed events and fan out to clients
   for (const eventType of STREAMED_EVENTS) {
