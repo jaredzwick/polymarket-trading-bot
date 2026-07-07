@@ -56,6 +56,8 @@ export interface TradeSignal {
   targetPrice: number;
   size: number;
   reason: string;
+  /** IDs of signals that triggered this trade decision (populated by SignalAwareStrategy). */
+  triggeringSignalIds?: string[];
 }
 
 export interface RiskLimits {
@@ -133,7 +135,8 @@ export type EventType =
   | "strategy_signal"
   | "risk_breach"
   | "market_update"
-  | "market_groups_updated";
+  | "market_groups_updated"
+  | "signal_emitted";
 
 export const Events = {
   ORDERBOOK_UPDATE: "orderbook_update",
@@ -145,6 +148,7 @@ export const Events = {
   RISK_BREACH: "risk_breach",
   MARKET_UPDATE: "market_update",
   MARKET_GROUPS_UPDATED: "market_groups_updated",
+  SIGNAL_EMITTED: "signal_emitted",
 } as const satisfies Record<string, EventType>;
 
 export interface BotEvent<T = unknown> {
@@ -152,3 +156,36 @@ export interface BotEvent<T = unknown> {
   timestamp: Date;
   data: T;
 }
+
+// Signal adapter framework (Phase 1 type definitions)
+export type {
+  SignalKind,
+  Signal,
+  TradeSignalPayload,
+  SentimentSignalPayload,
+  InferenceSignalPayload,
+} from "./signal";
+
+export type {
+  AdapterContext,
+  SignalAdapter,
+  HealthCheckAdapter,
+  AdapterDescriptor,
+} from "./adapter";
+
+export type {
+  LLMProvider,
+  LLMDistillerConfig,
+  LLMDistillerOutput,
+} from "./inference";
+
+export {
+  isSignalKind,
+  isSignal,
+  isLLMProvider,
+  isLLMDistillerConfig,
+  isSignalAdapter,
+  isAdapterContext,
+  isSignalOfKind,
+  isSignalFresh,
+} from "./guards";
