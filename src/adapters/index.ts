@@ -3,3 +3,11 @@ export { GdeltNewsAdapter, gdeltDescriptor, type GdeltAdapterConfig, type GdeltN
 export { KalshiAdapter, kalshiDescriptor, type KalshiAdapterConfig, type KalshiTradePayload } from "./kalshi";
 export { PolygonscanAdapter, polygonscanDescriptor, type PolygonscanAdapterConfig, type WhalePayload } from "./polygonscan";
 export { LLMDistillerAdapter, llmDistillerDescriptor } from "./llm-distiller";
+export {
+  LiveTennisAdapter,
+  liveTennisDescriptor,
+  type LiveTennisAdapterConfig,
+  type LiveTennisMarketMapping,
+  type LiveTennisTradePayload,
+  type LiveTennisRiskPayload,
+} from "./livetennis";
