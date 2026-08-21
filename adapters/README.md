@@ -93,5 +93,26 @@ await myAdapter.start();
 | Adapter | Author | Data source | Required env vars |
 |---|---|---|---|
 | Gamma API | built-in | `gamma-api.polymarket.com` | `GAMMA_TAGS`, `GAMMA_BASE_URL` (optional) |
+| `livetennis` | community | `api.livetennisapi.com` (live tennis match-state) | `LIVETENNIS_API_KEY` |
 
 _Open a PR to add your adapter to this table._
+
+### `livetennis`
+
+Emits live tennis **match-state** signals (`src/adapters/livetennis`). It is a
+DATA feed only — it reads public match-state and publishes typed `Signal`
+objects; it never places or routes orders. Map each tennis match to the
+Polymarket token whose YES outcome resolves on a player winning, and it emits:
+
+- **`trade`** — break-point momentum toward the receiving player (fires once on
+  break-point onset), mapped to BUY/SELL of the configured token. The
+  three-valued break-point flag follows the published rule: receiver at `40`/`AD`
+  vs server at `0`/`15`/`30`, never in a tiebreak.
+- **`risk`** — the match reached a terminal/void state (completed, retired,
+  walkover, suspended, cancelled); the live edge is gone, so `SignalAwareStrategy`
+  suppresses sizing.
+
+Config (`configs.livetennis`): `markets: [{ matchId, tokenId, player }]`, plus
+optional `baseUrl`, `livePath`, `refreshIntervalMs`, `breakPointConfidence`,
+`terminalConfidence`, `liveStatuses`, `terminalStatuses`. A free key (30 req/min,
+100/day, no card) is at <https://livetennisapi.com/subscribe/free>.
